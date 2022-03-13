@@ -1,0 +1,44 @@
+#!/bin/bash
+
+#**********************************************************************
+#                            XTpm2Password                            *
+#---------------------------------------------------------------------*
+# This program is free software; you can redistribute it and/or       *
+# modify it under the terms of the GNU Lesser General Public License  *
+# as published by the Free Software Foundation; either version 2      *
+# of the License, or (at your option) any later version.              *
+#                                                                     *
+# This program is distributed in the hope that it will be useful,     *
+# but WITHOUT ANY WARRANTY; without even the implied warranty of      *
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                *
+#**********************************************************************
+
+set -eu
+
+# SCRIPT_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
+
+# NOTE: use same TPM2_INITRAMFS_TOOL_OPTS in xtpm2-password and xtpm2-unseal
+
+# use default "--pcrs 7 --banks SHA256"
+TPM2_INITRAMFS_TOOL_OPTS=""
+# use custom
+#TPM2_INITRAMFS_TOOL_OPTS="--pcrs 0,1,2,3,4,5,6,7 --banks SHA256"
+
+TMP_FILE=".tpm2-getkey.${CRYPTTAB_NAME}.tmp"
+if [ -f "${TMP_FILE}" ]; then
+	# tmp file exists, meaning we tried the TPM this boot, but it didn’t
+	# work for the drive and this must be the second or later pass for the
+	# drive. Either the TPM is failed/missing, or has the wrong key stored in it.
+	/lib/cryptsetup/askpass "Automatic disk unlock via TPM failed for ($CRYPTTAB_SOURCE) Enter passphrase: "
+	exit
+fi
+# No tmp, so it is the first time trying the script.
+# Create a tmp file and try the TPM
+touch ${TMP_FILE}
+
+key=$(tpm2-initramfs-tool ${TPM2_INITRAMFS_TOOL_OPTS} unseal 2> /dev/null)
+if [ $? -ne 0 ]; then
+	/lib/cryptsetup/askpass "Automatic disk unlock via TPM failed for ($CRYPTTAB_SOURCE) Enter passphrase: "
+	exit
+fi
+printf $key

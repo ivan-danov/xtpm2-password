@@ -1,0 +1,6 @@
+.*.swp
+.*.kate-swp
+.AppleDouble
+.DS_Store
+*.deb
+output
