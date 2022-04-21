@@ -49,11 +49,11 @@ if [ -f "${TMP_FILE}" ]; then
 fi
 # No tmp, so it is the first time trying the script.
 # Create a tmp file and try the TPM
-touch ${TMP_FILE}
+touch "${TMP_FILE}"
 
-key=$(tpm2-initramfs-tool ${TPM2_INITRAMFS_TOOL_OPTS} unseal 2> /dev/null)
-if [ $? -ne 0 ]; then
+if key=$(tpm2-initramfs-tool ${TPM2_INITRAMFS_TOOL_OPTS} unseal 2> /dev/null); then
+#if [ $? -ne 0 ]; then
 	/lib/cryptsetup/askpass "Automatic disk unlock via TPM failed for ($CRYPTTAB_SOURCE) Enter passphrase: "
 	exit
 fi
-printf $key
+printf "%s" "$key"

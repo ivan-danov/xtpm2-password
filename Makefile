@@ -223,3 +223,7 @@ endef
 clean:
 	$(call clean_done_func)
 	@echo $(BEERSYM)$(PROJECT) cleaning done.
+
+check:
+	shellcheck ./xtpm2-password
+	shellcheck ./xtpm2-unseal
