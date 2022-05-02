@@ -43,8 +43,8 @@ VENDOR_YEAR = "2022"
 VENDOR_EMAIL = ivan.danov@gmail.com
 VENDOR_SITE = https://github.com/ivan-danov/xtpm2-password
 
-DEBDESC  = "$(VENDOR_NAME) package for repo\\n"
-DEBDESC += "custom repository"
+DEBDESC  = "$(VENDOR_NAME) $(PROJECT) package\\n"
+DEBDESC += "set luks password in tpm2"
 
 DEBDIR = $(PROJECT)_deb
 
