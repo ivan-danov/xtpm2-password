@@ -43,7 +43,7 @@ if [ -f "${TMP_FILE}" ]; then
 	# tmp file exists, meaning we tried the TPM this boot, but it didn’t
 	# work for the drive and this must be the second or later pass for the
 	# drive. Either the TPM is failed/missing, or has the wrong key stored in it.
-	/lib/cryptsetup/askpass "Automatic disk unlock via TPM failed for ($CRYPTTAB_SOURCE) Enter passphrase: "
+	/lib/cryptsetup/askpass "Automatic disk unlock via TPM failed for ($CRYPTTAB_SOURCE), Enter passphrase: "
 	exit
 fi
 # No tmp, so it is the first time trying the script.
@@ -51,8 +51,10 @@ fi
 touch "${TMP_FILE}"
 
 # shellcheck disable=SC2086
-if key=$(tpm2-initramfs-tool ${TPM2_INITRAMFS_TOOL_OPTS} unseal 2> /dev/null); then
-	/lib/cryptsetup/askpass "Automatic disk unlock via TPM failed for ($CRYPTTAB_SOURCE) Enter passphrase: "
+key=$(tpm2-initramfs-tool ${TPM2_INITRAMFS_TOOL_OPTS} unseal 2> /dev/null)
+# shellcheck disable=SC2181
+if [ $? -ne 0 ]; then
+	/lib/cryptsetup/askpass "Wrong password in TPM for ($CRYPTTAB_SOURCE), Enter passphrase: "
 	exit
 fi
 printf "%s" "$key"
